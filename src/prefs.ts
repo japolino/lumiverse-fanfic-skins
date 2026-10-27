@@ -21,6 +21,8 @@ export interface Prefs {
   progressBar: boolean;
   /** Restyle the home page's chat and character cards. */
   restyleHome: boolean;
+  /** Stop following a reply while it streams, like a page that does not scroll itself. */
+  holdScroll: boolean;
   /** Prose size in px before Lumiverse's font scale. 0 = the skin's default. */
   proseSize: number;
 }
@@ -52,6 +54,7 @@ export const DEFAULT_PREFS: Prefs = {
   paragraphComments: true,
   progressBar: true,
   restyleHome: true,
+  holdScroll: true,
   proseSize: 0,
 };
 

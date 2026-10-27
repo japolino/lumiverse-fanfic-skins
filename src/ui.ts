@@ -147,6 +147,7 @@ export class Chrome {
     for (const root of this.decorated.keys()) root.replaceChildren();
     this.decorated.clear();
     document.documentElement.removeAttribute("data-ffs-home");
+    document.documentElement.style.removeProperty("--ffs-persona-avatar");
   }
 
   /** Re-render everything, e.g. after a preference or chat change. */
@@ -260,6 +261,7 @@ export class Chrome {
         const root = this.ctx.ui.mount(point as never) as HTMLElement;
         root.classList.add("ffs-root");
         if (key === "dock") root.style.display = "contents";
+        if (key === "after") root.classList.add("ffs-stream-after");
         this.mounts[key] = root;
       } catch (err) {
         console.warn(`[fanfic-skins] mount ${point} unavailable`, err);
@@ -288,6 +290,9 @@ export class Chrome {
     if (hero) hero.innerHTML = on && prefs.restyleHome ? this.homeWelcome() : "";
 
     document.documentElement.toggleAttribute("data-ffs-home-cards", on && prefs.restyleHome);
+    // The Wattpad comment bar shows your persona beside the field.
+    const avatar = this.personaAvatar();
+    document.documentElement.style.setProperty("--ffs-persona-avatar", avatar ? `url("${avatar}")` : "none");
     this.updateProgress();
   }
 

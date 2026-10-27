@@ -14,6 +14,7 @@ const TOGGLES: Array<[keyof Prefs, string, string]> = [
   ["paragraphComments", "Paragraph comment bubbles", "Wattpad only, decorative. Click one to quote that line into your reply."],
   ["progressBar", "Reading progress", "Wattpad only. A teal bar with the time left to read."],
   ["restyleHome", "Restyle the home page", "Turn chat cards into archive entries or book covers."],
+  ["holdScroll", "Keep the page still while a reply streams", "New text appears below where you are reading. Scroll down when you are ready."],
 ];
 
 export const PANEL_CSS = `

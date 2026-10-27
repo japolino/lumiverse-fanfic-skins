@@ -187,6 +187,18 @@ ${S} [data-component="MessageList"] {
 }
 ${S} [data-component="MessageList"] > [data-spindle-mount="chat_stream_before"],
 ${S} [data-component="MessageList"] > [data-spindle-mount="chat_stream_after"] { display: block; }
+/* The list ends with a spacer the height of the composer. Tuck the end-of-work
+   block into it and pad below instead, so the composer never covers it. */
+${S} .ffs-stream-after:not(:empty) {
+  display: block;
+  position: relative;
+  z-index: 1;
+  /* Never let the browser anchor scrolling to this block: it sits below a
+     growing reply and would drag the page down with every new line. */
+  overflow-anchor: none;
+  margin-top: calc(-1 * var(--lcs-input-safe-zone, 100px));
+  padding-bottom: var(--lcs-input-safe-zone, 100px);
+}
 ${S} [data-component="MessageList"] > [class*="_virtualSpace_"] {
   width: min(100%, var(--ffs-measure)) !important;
   margin: 0 auto !important;

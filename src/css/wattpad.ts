@@ -28,6 +28,7 @@ export function wattpadCss(mode: Mode, proseSize: number, paragraphComments: boo
   const t = WATTPAD[mode];
   const layout = wattpadLayout(proseSize);
   const bubble = iconDataUri("comment", t.marker, 24);
+  const person = iconDataUri("user", t.textMuted, 18);
   const markers = paragraphComments
     ? `
 ${S} ${CHAR} [data-component="MessageContent"] p { position: relative; }
@@ -176,15 +177,56 @@ ${S} .ffs-wp-endrow .share button { width: 30px; height: 30px; border-radius: 50
 ${S} .ffs-wp-endrow .share button:hover { background: var(--ffs-orange); color: #fff; }
 ${S} .ffs-wp-copied { font-size: 12px; color: var(--ffs-teal); }
 
-/* ---------- Composer, as the comment box ---------- */
+/* ---------- Composer: Wattpad's comment box, docked under the page ---------- */
 ${S} [data-component="InputArea"] {
-  background: var(--ffs-page) !important; border: 0 !important; border-top: 1px solid var(--ffs-border) !important; box-shadow: none !important; border-radius: 0 !important;
+  left: 0 !important; right: 0 !important;
+  bottom: calc(var(--app-keyboard-inset-bottom, 0px) / var(--lumiverse-ui-scale, 1)) !important;
+  padding: 8px max(14px, calc((100% - var(--ffs-measure)) / 2 + 14px)) calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  gap: 6px !important;
+  background: var(--ffs-page) !important; background-image: none !important;
+  border: 0 !important; border-top: 1px solid var(--ffs-border) !important; border-radius: 0 !important;
+  box-shadow: 0 -8px 24px ${mode === "dark" ? "rgba(0,0,0,.45)" : "rgba(0,0,0,.06)"} !important;
+  backdrop-filter: none !important;
 }
-${S} [data-component="InputArea"] [class*="_inputWrapper_"] { background: var(--ffs-panel-alt) !important; border: 1px solid var(--ffs-border) !important; border-radius: 22px !important; box-shadow: none !important; }
-${S} [data-component="InputArea"] [class*="_inputWrapper_"]:focus-within { border-color: var(--ffs-purple-text) !important; background: var(--ffs-input-focus) !important; }
-${S} [data-component="InputArea"] textarea { background: transparent !important; color: var(--ffs-text) !important; font-family: var(--ffs-ui-font) !important; }
-${S} [data-component="InputArea"] [class*="_sendBtn_"] { background: var(--ffs-purple-soft) !important; color: var(--ffs-purple-text) !important; border: 0 !important; border-radius: 50% !important; box-shadow: none !important; }
-${S} [data-component="InputArea"] [class*="_sendBtn_"]:hover { background: var(--ffs-purple-text) !important; color: #fff !important; }
+${S} [data-component="InputArea"] [class*="_actionBtn_"]:hover { color: var(--ffs-orange-text) !important; }
+${S} [data-component="InputArea"] [class*="_inputRow_"] { align-items: flex-end !important; gap: 8px !important; }
+/* You, beside the field, like on a Wattpad comment. */
+${S} [data-component="InputArea"] [class*="_inputRow_"]::before {
+  content: ""; flex: 0 0 36px; width: 36px; height: 36px; margin: 0 2px 2px 0; border-radius: 50%;
+  background: var(--ffs-persona-avatar, none) center / cover no-repeat, ${person} center / 18px no-repeat, var(--ffs-panel-alt);
+  box-shadow: inset 0 0 0 1px var(--ffs-border);
+}
+${S} [data-component="InputArea"] [class*="_inputWrapper_"] {
+  background: var(--ffs-panel-alt) !important; border: 1px solid var(--ffs-border) !important; border-radius: 20px !important;
+  box-shadow: none !important; padding: 0 6px !important;
+}
+${S} [data-component="InputArea"] [class*="_inputWrapper_"]:focus-within {
+  border-color: var(--ffs-orange) !important; background: var(--ffs-input-focus) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ffs-orange) 18%, transparent) !important;
+}
+${S} [data-component="InputArea"] :is(textarea, [class*="_textareaMirror_"]) { font-family: var(--ffs-ui-font) !important; }
+${S} [data-component="InputArea"] textarea { background: transparent !important; color: var(--ffs-text) !important; }
+${S} [data-component="InputArea"] textarea::placeholder { color: var(--ffs-text-dim) !important; }
+/* The orange Post pill; it turns into a dark Stop pill while a part is being written. */
+${S} [data-component="InputArea"] [class*="_sendBtnShell_"] { width: auto !important; }
+${S} [data-component="InputArea"] [class*="_sendBtn_"] {
+  width: auto !important; min-width: 40px; height: 40px !important; padding: 0 17px 0 14px !important; gap: 6px;
+  border: 0 !important; border-radius: 999px !important; box-shadow: none !important; transform: none !important;
+  background: var(--ffs-orange) !important; color: #fff !important;
+  font: 600 15px/1 var(--ffs-ui-font) !important; letter-spacing: .1px;
+}
+${S} [data-component="InputArea"] [class*="_sendBtn_"]:hover:not(:disabled) { background: var(--ffs-accent-hover) !important; }
+${S} [data-component="InputArea"] [class*="_sendBtn_"]:active:not(:disabled) { transform: scale(.97) !important; }
+${S} [data-component="InputArea"] [class*="_sendBtn_"]:disabled { background: var(--ffs-panel-alt) !important; color: var(--ffs-text-dim) !important; opacity: 1 !important; }
+${S} [data-component="InputArea"] [class*="_sendBtn_"]:not([class*="_sendBtnHoldTracking_"])::after { content: "Post"; }
+${S} [data-component="InputArea"] [class*="_sendBtn_"][class*="_sendBtnStop_"] { background: var(--ffs-pill) !important; color: var(--ffs-pill-text) !important; }
+${S} [data-component="InputArea"] [class*="_sendBtn_"][class*="_sendBtnStop_"]:hover:not(:disabled) { background: var(--ffs-pill) !important; filter: brightness(1.15); }
+${S} [data-component="InputArea"] [class*="_sendBtn_"][class*="_sendBtnStop_"]::after { content: "Stop"; }
+@media (max-width: 560px) {
+  ${S} [data-component="InputArea"] [class*="_inputRow_"]::before { display: none; }
+  ${S} [data-component="InputArea"] [class*="_sendBtn_"] { width: 40px !important; padding: 0 !important; }
+  ${S} [data-component="InputArea"] [class*="_sendBtn_"]::after { content: none !important; }
+}
 
 /* ---------- Buttons and surfaces ---------- */
 ${S} button[class*="_btnPrimary_"] { border-radius: 999px !important; }

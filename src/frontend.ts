@@ -3,6 +3,7 @@ import { ao3Css } from "./css/ao3";
 import { guard } from "./css/common";
 import { wattpadCss } from "./css/wattpad";
 import { exportWork } from "./export";
+import { StreamHold } from "./hold";
 import { PANEL_CSS, Panel } from "./panel";
 import { Store } from "./prefs";
 import type { Mode } from "./tokens";
@@ -37,6 +38,8 @@ export function setup(ctx: SpindleFrontendContext) {
     exportWork: () => void download(),
     editWork: () => panel.openWork(),
   });
+
+  const hold = new StreamHold(ctx, () => store.prefs.skin !== "off" && store.prefs.holdScroll);
 
   async function download(): Promise<void> {
     const info = work.info;
@@ -106,6 +109,7 @@ export function setup(ctx: SpindleFrontendContext) {
   panel.start();
   chrome.start();
   chrome.refresh();
+  hold.start();
   stops.push(store.onChange(renderAll));
   stops.push(work.onChange(onWorkChange));
 
@@ -133,6 +137,7 @@ export function setup(ctx: SpindleFrontendContext) {
   return () => {
     disposed = true;
     for (const stop of stops.splice(0)) stop();
+    hold.stop();
     chrome.stop();
     panel.stop();
     work.dispose();

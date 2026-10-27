@@ -24,11 +24,13 @@ A lumitheme can only recolor what is already on the page. This extension goes fu
 - **Part headings** ("Chapter One") with reads, votes and reading time.
 - **Paragraph comment bubbles** in the margin. Clicking one quotes that paragraph into your reply.
 - Your replies appear as reader comments, and **Continue to next part** sits at the end of each chat.
+- The message bar becomes Wattpad's **comment box**, docked under the page. It shows your persona's avatar, a rounded field and an orange **Post** pill that turns into **Stop** while a part is being written.
 - The home page becomes a library shelf of covers.
 
 ### Both
 
 - **Light and dark** for each skin. *Match Lumiverse* follows your Lumiverse light/dark mode, or you can pin one.
+- **The page holds still while a reply streams.** New text appears below where you are reading instead of dragging the page down; scroll when you're ready, or use the jump-to-bottom button. You can turn this off.
 - A **Fanfic** tab in the drawer: pick a skin, the mode and the text size, and turn each page part on or off.
 - **Tag each work** in that tab: title, rating, warning, category, fandom, relationships, additional tags, summary and complete/WIP. The tags are saved per chat on your Lumiverse account.
 - **Download as AO3 HTML.** Saves the whole chat, not just the loaded part, as a self-contained page in the layout of AO3's own HTML download, with your tags, chapters and comments.
