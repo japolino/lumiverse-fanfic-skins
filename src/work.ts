@@ -281,13 +281,6 @@ function titleFromDocument(): string {
   return title && title !== "Lumiverse" ? title : "";
 }
 
-export function formatCount(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
-  if (n >= 10_000) return `${Math.round(n / 1000)}K`;
-  if (n >= 1_000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}K`;
-  return String(n);
-}
-
 export function formatDate(date: Date | null): string {
   if (!date) return "—";
   const y = date.getFullYear();

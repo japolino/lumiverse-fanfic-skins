@@ -1,5 +1,4 @@
 import { AO3, type Mode } from "../tokens";
-import { ao3RequiredTags } from "../generated/assets";
 import { CHAR, MSG, S, USER, reader, variables, type Layout } from "./common";
 
 export function ao3Layout(proseSize: number): Layout {
@@ -13,34 +12,10 @@ export function ao3Layout(proseSize: number): Layout {
   };
 }
 
-/** Sprite offsets from AO3's 13-group-blurb.css. */
-export const REQUIRED_TAG_POS: Record<string, string> = {
-  "rating-general": "-50px -25px",
-  "rating-teen": "0 -25px",
-  "rating-mature": "-75px -25px",
-  "rating-explicit": "-25px -25px",
-  "rating-notrated": "-150px 0",
-  "warning-none": "-150px 0",
-  "warning-choosenotto": "-125px -25px",
-  "warning-yes": "-150px -25px",
-  "category-none": "-150px 0",
-  "category-ff": "-25px 0",
-  "category-gen": "-50px 0",
-  "category-mm": "0 0",
-  "category-fm": "-75px 0",
-  "category-multi": "-100px 0",
-  "category-other": "-125px 0",
-  "complete-yes": "-175px -25px",
-  "complete-no": "-100px -25px",
-};
-
 export function ao3Css(mode: Mode, proseSize: number): string {
   const t = AO3[mode];
   const layout = ao3Layout(proseSize);
   const bevel = `linear-gradient(${t.btnTop} 2%, ${t.btnBottom} 95%, ${t.btnEdge} 100%)`;
-  const sprite = Object.entries(REQUIRED_TAG_POS)
-    .map(([k, pos]) => `${S} .ffs-req .${k} { background-position: ${pos}; }`)
-    .join("\n");
 
   return `
 ${variables(t, mode, layout)}
@@ -85,10 +60,6 @@ ${S} .ffs-ao3-nav {
 }
 ${S} .ffs-ao3-nav button.ffs-ao3-navlink { all: unset; cursor: pointer; color: #fff; font-size: 14px; padding: 6px 10.5px; line-height: 18px; }
 ${S} .ffs-ao3-nav button.ffs-ao3-navlink:hover, ${S} .ffs-ao3-nav button.ffs-ao3-navlink:focus-visible { background: #ddd; color: #900; outline: none; }
-${S} .ffs-ao3-search { margin-left: auto; display: flex; align-items: center; gap: 4px; }
-${S} .ffs-ao3-search input { width: 150px; height: 18px; border: 0; border-radius: 14px; padding: 2px 10px; background: #eee; color: #2a2a2a; font: inherit; font-size: 12px; box-shadow: inset 0 1px 2px #bbb; }
-${S} .ffs-ao3-search button { all: unset; cursor: pointer; font-size: 12px; padding: 2px 9px; border-radius: 14px; background: #eee; color: #2a2a2a; border: 1px solid #bbb; }
-${S} .ffs-ao3-search button:hover { color: #900; }
 
 /* ---------- AO3 buttons ---------- */
 ${S} .ffs-ao3-btn,
@@ -140,13 +111,9 @@ ${S} .ffs-ao3-tag.strong { font-weight: 700; }
 ${S} .ffs-ao3-meta .stats { display: flex; flex-wrap: wrap; gap: 0 .9em; margin: 0; }
 ${S} .ffs-ao3-meta .stats span b { font-weight: 400; color: var(--ffs-text); }
 ${S} .ffs-ao3-meta .stats span i { font-style: normal; color: var(--ffs-text); margin-left: .35em; }
-${S} .ffs-ao3-edit { position: absolute; right: .75em; bottom: .5em; font-size: 11px; }
+${S} .ffs-ao3-edit { grid-column: 1 / -1; justify-self: end; margin: -.2em 0 .2em; font-size: 11px; }
 ${S} .ffs-ao3-edit button { all: unset; cursor: pointer; color: var(--ffs-text-dim); border-bottom: 1px dotted currentColor; }
 ${S} .ffs-ao3-edit button:hover { color: var(--ffs-accent-text); }
-${S} .ffs-req { position: absolute; top: .8em; right: .75em; display: grid; grid-template-columns: repeat(2, 25px); gap: 3px; margin: 0; padding: 0; list-style: none; }
-${S} .ffs-req span { display: block; width: 25px; height: 25px; background-image: url("${ao3RequiredTags}"); background-repeat: no-repeat; }
-${sprite}
-${S} .ffs-ao3-meta.has-req { padding-right: 70px; }
 
 ${S} .ffs-ao3-preface { margin: 1.5em 3em .5em; padding: .643em .643em 0; }
 ${S} .ffs-ao3-preface h2 { font: 400 calc(2.1em * var(--lumiverse-font-scale, 1))/1.2 var(--ffs-heading-font); color: var(--ffs-heading); text-align: center; margin: 0 0 .3em; }
@@ -199,12 +166,7 @@ ${S} [data-component="BubbleMessage"][data-part="user"] [class*="_headerLeft_"] 
 /* ---------- End of work ---------- */
 ${S} .ffs-ao3-end { width: min(100%, var(--ffs-measure)); margin: 0 auto; padding: 1.2em var(--ffs-gutter) 2.4em; box-sizing: border-box; background: var(--ffs-page); font-family: var(--ffs-ui-font); font-size: 13px; color: var(--ffs-text); }
 ${S} .ffs-ao3-end .actions { display: flex; justify-content: flex-end; gap: 6px; flex-wrap: wrap; margin: 0 0 1em; padding: 0; list-style: none; }
-${S} .ffs-ao3-kudos { display: flex; gap: .6em; align-items: flex-start; padding: .75em .25em; border-top: 1px solid var(--ffs-border); }
-${S} .ffs-ao3-kudos .heart { flex: 0 0 auto; width: 26px; height: 22px; color: ${mode === "dark" ? "#ff8f8f" : "#990000"}; }
-${S} .ffs-ao3-kudos .heart svg { width: 100%; height: 100%; }
-${S} .ffs-ao3-kudos a { color: var(--ffs-link); border-bottom: 1px dotted var(--ffs-tag-underline); }
-${S} .ffs-ao3-kudos.pop .heart { animation: ffs-pop .5s ease; }
-@keyframes ffs-pop { 0% { transform: scale(1); } 40% { transform: scale(1.5); } 100% { transform: scale(1); } }
+${S} .ffs-ao3-notice { margin: 0; padding: .6em .25em; border-top: 1px solid var(--ffs-border); color: var(--ffs-text-muted); }
 ${S} .ffs-ao3-colophon { margin-top: 1.4em; text-align: center; font-size: 11px; color: var(--ffs-text-dim); }
 
 /* ---------- Composer, as the comment form ---------- */
@@ -270,14 +232,13 @@ ${S} .ffs-ao3-welcome { width: 100%; margin: 14px 0 8px; padding: 0; box-sizing:
 ${S} .ffs-ao3-welcome h2 { margin: 0; font: 400 calc(26px * var(--lumiverse-font-scale, 1))/1.2 Georgia, serif; color: var(--ffs-heading); }
 ${S} .ffs-ao3-welcome p { margin: .3em 0 0; color: var(--ffs-text-muted); }
 
-/* ---------- AO3 required tags in menus ---------- */
+/* ---------- menus and focus ---------- */
 ${S} [role="option"][aria-selected="true"] { box-shadow: inset 3px 0 0 var(--ffs-nav) !important; }
 ${S} :where(button, a, [role="button"]):focus-visible { outline: 2px solid var(--ffs-accent) !important; outline-offset: 2px; }
 
 @media (max-width: 760px) {
   ${S} .ffs-ao3-wordmark { font-size: 19px; }
   ${S} .ffs-ao3-logo { height: 34px; }
-  ${S} .ffs-ao3-search input { width: 90px; }
   ${S} .ffs-ao3-user .ffs-ao3-greet { display: none; }
   ${S} ${USER} [data-component="MessageContent"] { padding-left: .9em !important; }
   ${S} ${USER} > [class*="_bubble_"] > [class*="_header_"] { padding-left: 52px !important; }

@@ -9,10 +9,10 @@ type DrawerTab = ReturnType<SpindleFrontendContext["ui"]["registerDrawerTab"]>;
 
 const TOGGLES: Array<[keyof Prefs, string, string]> = [
   ["siteHeader", "Site header", "The masthead and navigation above chats and the home page."],
-  ["workHeader", "Story header", "AO3's work preface or Wattpad's “You are reading” banner."],
+  ["workHeader", "Story header", "AO3's tag box and summary, or Wattpad's cover and blurb."],
   ["chapterHeadings", "Chapter headings", "Number each character reply as a chapter."],
-  ["paragraphComments", "Paragraph comment bubbles", "Wattpad only, decorative. Click one to quote that line into your reply."],
-  ["progressBar", "Reading progress", "Wattpad only. A teal bar with the time left to read."],
+  ["paragraphComments", "Paragraph quote markers", "Wattpad only. A faint marker beside the paragraph you hover; click it to quote that line into your reply."],
+  ["progressBar", "Reading progress line", "Wattpad only. A thin line under the story bar."],
   ["restyleHome", "Restyle the home page", "Turn chat cards into archive entries or book covers."],
   ["holdScroll", "Keep the page still while a reply streams", "New text appears below where you are reading. Scroll down when you are ready."],
 ];
@@ -220,7 +220,6 @@ export class Panel {
     <button class="ffs-btn primary" data-act="export">${icon.download(14)} Download as AO3 HTML</button>
     <button class="ffs-btn" data-act="reset-work">Reset tags</button>
   </div>
-  <p class="hint">Kudos ${meta.kudos ? "left" : "not left yet"} · ${meta.votes?.length ?? 0} votes · ${meta.hits ?? 1} hits on this work.</p>
 </section>
 <p class="hint">Tip: if you use a custom lumitheme, switch Lumiverse back to a built-in theme so the two don't fight.</p>
 </div>`;
@@ -235,8 +234,7 @@ export class Panel {
     else if (el.dataset.act === "reset-work") {
       const chatId = this.work.info?.chatId;
       if (!chatId) return;
-      const { kudos, votes, hits, inLibrary } = this.store.work(chatId);
-      this.store.works = { ...this.store.works, [chatId]: { kudos, votes, hits, inLibrary } };
+      this.store.works = { ...this.store.works, [chatId]: {} };
       this.store.setWork(chatId, {});
       this.render(true);
     }

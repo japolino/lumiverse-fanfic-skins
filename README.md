@@ -2,30 +2,32 @@
 
 Read your Lumiverse chats the way you read fanfiction: as an **Archive of Our Own** work or a **Wattpad** story. Both skins come in light and dark.
 
-A lumitheme can only recolor what is already on the page. This extension goes further: it adds a site header, a tagged work preface, chapter headings, kudos and votes, a reading-progress bar, and a downloadable copy of the whole story.
+A lumitheme can only recolor what is already on the page. This extension goes further: it adds a site header, a tagged work preface or story banner, chapter headings, and a downloadable copy of the whole story.
+
+The skins borrow each site's look, not its social features. There are no kudos, votes, read counts or other made-up numbers, and nothing on the page moves unless you scroll it.
 
 ## What changes
 
 ### AO3
 
-- The **Archive of Our Own** masthead with the red navigation bar. The links go to the home page, your characters, search (the command palette), personas and settings.
-- A **work preface** above every chat: the tag box with rating, archive warning, category, fandom, relationships, characters and additional tags, the required-tags square icons, and stats (published, updated, words, chapters, comments, kudos, hits). Below it are the title, the byline (the card's creator) and a summary.
+- The **Archive of Our Own** masthead with the red navigation bar. The links go to the home page, your characters, your personas and search (the command palette). Skins and Preferences sit at the top right.
+- A **work preface** above every chat: the tag box with rating, archive warning, category, fandom, relationships, characters and additional tags, and stats (published, updated, words, chapters). Below it are the title, the byline (the card's creator) and a summary.
 - **Chapter headings.** Each character reply is a chapter.
 - **Your replies are comments**, with the grey comment header, your persona's square icon and "on Chapter N".
-- Work navigation in the chat toolbar: **Chapter Index** (jump to any chapter), **Kudos ♥** and **Download**.
-- End-of-work actions: ↑ Top, **Next Chapter →** (sends your draft, or asks for the next reply), Kudos and Comments. A "you left kudos" line appears once you have left kudos.
+- **Chapter Index** (jump to any chapter) and **Download** in the chat toolbar.
+- At the end: ↑ Top and **Next Chapter →** (sends your draft, or asks for the next reply), with a one-line word count.
 - The home page becomes **Your Works**, with each chat shown as a work blurb.
 
 ### Wattpad
 
-- The Wattpad header with the orange **W**, Browse, Community, search, Write and a purple button that opens the skin panel.
-- A **"You are reading"** hero: the blurred cover, title, genre, reads, votes, parts, summary and #tags.
-- A sticky **story bar** with the cover, Add to library (+) and **Vote ★**, plus a teal **reading-progress bar** that shows the minutes left while you scroll.
-- **Part headings** ("Chapter One") with reads, votes and reading time.
-- **Paragraph comment bubbles** in the margin. Clicking one quotes that paragraph into your reply.
+- A slim header: the orange **W**, search, the skin panel and your avatar.
+- A **story banner**: the blurred cover, title, author, number of parts and summary.
+- A **story bar** with the cover and title. Click it for the table of contents.
+- **Part headings** ("Chapter One").
 - Your replies appear as reader comments, and **Continue to next part** sits at the end of each chat.
 - The message bar becomes Wattpad's **comment box**, docked under the page. It shows your persona's avatar, a rounded field and an orange **Post** pill that turns into **Stop** while a part is being written.
 - The home page becomes a library shelf of covers.
+- Optional, off by default: a faint **quote marker** beside the paragraph you hover (click it to quote that line into your reply), and a thin **reading-progress line** under the story bar.
 
 ### Both
 
@@ -64,7 +66,8 @@ bun run build
 | `src/frontend.ts` | Entry point: loads prefs, applies the skin CSS, starts everything |
 | `src/tokens.ts` | Color and type tokens for AO3 and Wattpad, light and dark |
 | `src/css/` | The skins. `common.ts` maps the tokens onto Lumiverse's variables and the reading column |
-| `src/ui.ts` | Injected header, preface/hero, chapter headings, toolbar actions, progress bar |
+| `src/ui.ts` | Injected header, preface/banner, chapter headings, toolbar actions, progress line |
+| `src/hold.ts` | Keeps the page still while a reply streams |
 | `src/work.ts` | Reads the active chat: chapters, word counts, dates, cover, summary |
 | `src/panel.ts` | The Fanfic drawer tab |
 | `src/export.ts` | AO3-style HTML download |

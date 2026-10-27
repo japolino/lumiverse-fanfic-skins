@@ -89,19 +89,6 @@ export function setup(ctx: SpindleFrontendContext) {
     panel.render();
   }
 
-  // Hits count once per visit to a chat.
-  let lastChat: string | null = null;
-  function onWorkChange(): void {
-    const chatId = work.info?.chatId ?? null;
-    if (chatId && chatId !== lastChat) {
-      lastChat = chatId;
-      const hits = store.work(chatId).hits ?? 0;
-      store.setWork(chatId, { hits: hits + 1 });
-      return; // setWork re-renders through the store listener
-    }
-    if (!chatId) lastChat = null;
-    renderAll();
-  }
 
   // Paint from this browser's cached prefs first; the server copy follows.
   store.loadCached();
@@ -111,7 +98,7 @@ export function setup(ctx: SpindleFrontendContext) {
   chrome.refresh();
   hold.start();
   stops.push(store.onChange(renderAll));
-  stops.push(work.onChange(onWorkChange));
+  stops.push(work.onChange(renderAll));
 
   void (async () => {
     await store.load();

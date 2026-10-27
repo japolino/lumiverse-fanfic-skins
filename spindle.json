@@ -1,12 +1,14 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "name": "Fanfic Skins",
   "identifier": "fanfic_skins",
   "author": "japolino",
   "github": "https://github.com/japolino/lumiverse-fanfic-skins",
   "homepage": "https://github.com/japolino/lumiverse-fanfic-skins",
-  "description": "Read your chats as an AO3 work or a Wattpad story: site header, tagged work preface, chapter headings, kudos and votes, reading progress, and an AO3-style HTML download. Light and dark for both.",
-  "permissions": ["generation"],
+  "description": "Read your chats as an AO3 work or a Wattpad story: site header, tagged work preface or story banner, chapter headings, a page that holds still while replies stream, and an AO3-style HTML download. Light and dark for both.",
+  "permissions": [
+    "generation"
+  ],
   "entry_frontend": "dist/frontend.js",
   "minimum_lumiverse_version": "1.3.0"
 }

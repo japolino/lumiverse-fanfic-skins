@@ -3,7 +3,7 @@ import { AO3_LOGO, wattpadMark } from "./brand";
 import { icon } from "./icons";
 import type { Category, Rating, Store, Warning, WorkMeta } from "./prefs";
 import type { SkinId } from "./tokens";
-import { formatCount, formatDate, readingMinutes, type WorkInfo, type WorkTracker } from "./work";
+import { formatDate, readingMinutes, type WorkInfo, type WorkTracker } from "./work";
 
 export const RATING_LABEL: Record<Rating, string> = {
   notrated: "Not Rated",
@@ -61,8 +61,6 @@ export interface ShownWork {
   characters: string[];
   tags: string[];
   summary: string;
-  hits: number;
-  votes: number;
 }
 
 export function shownWork(info: WorkInfo, meta: WorkMeta): ShownWork {
@@ -79,8 +77,6 @@ export function shownWork(info: WorkInfo, meta: WorkMeta): ShownWork {
     characters: [info.characterName, info.personaName].filter((v, i, a) => v && a.indexOf(v) === i),
     tags: meta.additionalTags !== undefined ? splitTags(meta.additionalTags) : info.characterTags,
     summary: meta.summary?.trim() || info.defaultSummary,
-    hits: meta.hits ?? 1,
-    votes: meta.votes?.length ?? 0,
   };
 }
 
@@ -109,7 +105,6 @@ export class Chrome {
   private observer: MutationObserver | null = null;
   private frame = 0;
   private scroller: Element | null = null;
-  private progressIdle: ReturnType<typeof setTimeout> | null = null;
   private notice: { text: string; until: number } | null = null;
 
   constructor(
@@ -224,14 +219,10 @@ export class Chrome {
     </div>
   </div>
   <nav class="ffs-ao3-nav" aria-label="Site">
-    <button class="ffs-ao3-navlink" data-ffs-act="characters">Fandoms</button>
-    <button class="ffs-ao3-navlink" data-ffs-act="home">Browse</button>
+    <button class="ffs-ao3-navlink" data-ffs-act="home">Home</button>
+    <button class="ffs-ao3-navlink" data-ffs-act="characters">Characters</button>
+    <button class="ffs-ao3-navlink" data-ffs-act="personas">Personas</button>
     <button class="ffs-ao3-navlink" data-ffs-act="search">Search</button>
-    <button class="ffs-ao3-navlink" data-ffs-act="personas">People</button>
-    <div class="ffs-ao3-search">
-      <input type="text" readonly data-ffs-act="search" aria-label="Search the archive">
-      <button data-ffs-act="search">Search</button>
-    </div>
   </nav>
 </header>`;
   }
@@ -241,13 +232,10 @@ export class Chrome {
     return `
 <header class="ffs-wp-header">
   <button class="ffs-wp-brand" data-ffs-act="home" title="Home"><b>wattpad</b>${wattpadMark()}</button>
-  <button class="ffs-wp-link" data-ffs-act="characters">Browse ${icon.chevronDown(14)}</button>
-  <button class="ffs-wp-link ffs-wp-hide-sm" data-ffs-act="personas">Community ${icon.chevronDown(14)}</button>
-  <div class="ffs-wp-search" data-ffs-act="search">${icon.search(18)}<input type="text" readonly placeholder="Search" data-ffs-act="search"></div>
   <div class="ffs-wp-right">
-    <button class="ffs-wp-link ffs-wp-hide-sm" data-ffs-act="lore">Write ${icon.chevronDown(14)}</button>
-    <button class="ffs-wp-premium" data-ffs-act="skins" title="Fanfic Skins">${icon.bolt(14)} Skins</button>
-    ${avatar ? `<img class="ffs-wp-avatar" src="${esc(avatar)}" alt="" data-ffs-act="settings">` : ""}
+    <button class="ffs-wp-icon" data-ffs-act="search" title="Search">${icon.search(18)}</button>
+    <button class="ffs-wp-icon" data-ffs-act="skins" title="Fanfic Skins">${icon.book(18)}</button>
+    ${avatar ? `<img class="ffs-wp-avatar" src="${esc(avatar)}" alt="" title="Settings" data-ffs-act="settings">` : ""}
   </div>
 </header>`;
   }
@@ -281,10 +269,10 @@ export class Chrome {
     if (before) before.innerHTML = on && prefs.workHeader && shown ? (prefs.skin === "ao3" ? this.ao3Preface(shown) : this.wattpadHero(shown)) : "";
 
     const after = this.mount("after");
-    if (after) after.innerHTML = on && shown ? (prefs.skin === "ao3" ? this.ao3End(shown) : this.wattpadEnd(shown)) : "";
+    if (after) after.innerHTML = on && shown ? (prefs.skin === "ao3" ? this.ao3End(shown) : this.wattpadEnd()) : "";
 
     const dock = this.mount("dock");
-    if (dock) dock.innerHTML = on && shown ? (prefs.skin === "ao3" ? this.ao3WorkNav(shown) : this.wattpadStoryBar(shown)) : "";
+    if (dock) dock.innerHTML = on && shown ? (prefs.skin === "ao3" ? this.ao3WorkNav() : this.wattpadStoryBar(shown)) : "";
 
     const hero = this.mount("hero");
     if (hero) hero.innerHTML = on && prefs.restyleHome ? this.homeWelcome() : "";
@@ -299,18 +287,11 @@ export class Chrome {
   private ao3Preface(w: ShownWork): string {
     const tagList = (items: string[], strong = false) =>
       `<ul>${items.map((t) => `<li><a class="ffs-ao3-tag${strong ? " strong" : ""}">${esc(t)}</a></li>`).join("")}</ul>`;
-    const lang = languageName();
     const chapters = `${w.info.chapters}/${w.complete ? w.info.chapters : "?"}`;
     const approx = w.info.estimated ? "~" : "";
     return `
 <div class="ffs-ao3-work">
-  <dl class="ffs-ao3-meta has-req">
-    <ul class="ffs-req" aria-hidden="true">
-      <li><span class="rating-${w.rating}" title="${esc(RATING_LABEL[w.rating])}"></span></li>
-      <li><span class="category-${w.category}" title="${esc(CATEGORY_LABEL[w.category])}"></span></li>
-      <li><span class="warning-${w.warning}" title="${esc(WARNING_LABEL[w.warning])}"></span></li>
-      <li><span class="complete-${w.complete ? "yes" : "no"}" title="${w.complete ? "Complete Work" : "Work in Progress"}"></span></li>
-    </ul>
+  <dl class="ffs-ao3-meta">
     <dt>Rating:</dt><dd>${tagList([RATING_LABEL[w.rating]])}</dd>
     <dt class="warn">Archive Warning:</dt><dd>${tagList([WARNING_LABEL[w.warning]], true)}</dd>
     ${w.category !== "none" ? `<dt>Category:</dt><dd>${tagList([CATEGORY_LABEL[w.category]])}</dd>` : ""}
@@ -318,16 +299,12 @@ export class Chrome {
     ${w.relationships.length ? `<dt>Relationship:</dt><dd>${tagList(w.relationships)}</dd>` : ""}
     <dt>Characters:</dt><dd>${tagList(w.characters)}</dd>
     ${w.tags.length ? `<dt>Additional Tags:</dt><dd>${tagList(w.tags)}</dd>` : ""}
-    <dt>Language:</dt><dd>${esc(lang)}</dd>
     <dt>Stats:</dt>
     <dd><div class="stats">
       <span><b>Published:</b><i>${formatDate(w.info.published)}</i></span>
       ${w.info.updated && w.info.published && formatDate(w.info.updated) !== formatDate(w.info.published) ? `<span><b>${w.complete ? "Completed" : "Updated"}:</b><i>${formatDate(w.info.updated)}</i></span>` : ""}
       <span><b>Words:</b><i>${approx}${w.info.words.toLocaleString()}</i></span>
       <span><b>Chapters:</b><i>${chapters}</i></span>
-      <span><b>Comments:</b><i>${w.info.replies.toLocaleString()}</i></span>
-      <span><b>Kudos:</b><i>${w.meta.kudos ? 1 : 0}</i></span>
-      <span><b>Hits:</b><i>${w.hits.toLocaleString()}</i></span>
     </div></dd>
     <div class="ffs-ao3-edit"><button data-ffs-act="edit">Edit Tags</button></div>
   </dl>
@@ -341,86 +318,61 @@ export class Chrome {
 
   private wattpadHero(w: ShownWork): string {
     const cover = w.info.coverUrl;
-    const tags = w.tags.slice(0, 8);
+    const parts = `${w.info.chapters} ${w.info.chapters === 1 ? "part" : "parts"}`;
     return `
 <section class="ffs-wp-hero">
   ${cover ? `<div class="bg" style="background-image:url('${esc(cover)}')"></div>` : ""}
   <div class="inner">
     ${cover ? `<img class="cover" src="${esc(cover)}" alt="">` : ""}
     <div>
-      <div class="label">You are reading</div>
       <h2>${esc(w.title)}</h2>
-      <div class="genre">${esc(w.fandom === "Original Work" ? "Roleplay" : w.fandom)} · by ${esc(w.info.author)}</div>
-      <div class="stats">
-        <span>${icon.eye(14)} ${formatCount(w.hits)} Reads</span>
-        <span>${icon.star(14)} ${formatCount(w.votes)} Votes</span>
-        <span>${icon.list(14)} ${w.info.chapters} Parts</span>
-      </div>
+      <div class="byline">by ${esc(w.info.author)} · ${parts}</div>
       ${w.summary ? `<p>${esc(w.summary)}</p>` : ""}
-      ${tags.length ? `<div class="tags">${tags.map((t) => `<span>#${esc(t.replace(/\s+/g, "").toLowerCase())}</span>`).join("")}</div>` : ""}
+      <button class="edit" data-ffs-act="edit">Edit details</button>
     </div>
   </div>
-  <button class="edit" data-ffs-act="edit">Edit story details</button>
 </section>`;
   }
 
-  private ao3WorkNav(w: ShownWork): string {
+  private ao3WorkNav(): string {
     return `
 <span class="ffs-ao3-worknav">
   <button class="ffs-ao3-btn" data-ffs-act="index">Chapter Index ↓</button>
-  <button class="ffs-ao3-btn" data-ffs-act="kudos" aria-pressed="${w.meta.kudos ? "true" : "false"}">Kudos ♥</button>
   <button class="ffs-ao3-btn" data-ffs-act="download">Download ↓</button>
 </span>`;
   }
 
   private wattpadStoryBar(w: ShownWork): string {
-    const latest = this.latestPartId();
-    const voted = latest ? (w.meta.votes ?? []).includes(latest) : false;
     return `
 <span class="ffs-wp-storybar">
-  <span class="ffs-wp-story">
+  <button class="ffs-wp-story" data-ffs-act="index" title="Table of contents">
     ${w.info.coverThumbUrl ? `<img src="${esc(w.info.coverThumbUrl)}" alt="">` : ""}
     <span class="meta"><b>${esc(w.title)}</b><span>by ${esc(w.info.author)}</span></span>
-    <button data-ffs-act="index" title="Table of contents">${icon.chevronDown(18)}</button>
-  </span>
-  <button class="ffs-wp-add" data-ffs-act="library" aria-pressed="${w.meta.inLibrary ? "true" : "false"}" title="${w.meta.inLibrary ? "In your library" : "Add to library"}">${w.meta.inLibrary ? "✓" : icon.plus(16)}</button>
-  <button class="ffs-wp-vote" data-ffs-act="vote" aria-pressed="${voted}">${voted ? icon.star(16) : icon.starOutline(16)} Vote</button>
-  ${this.store.prefs.progressBar ? `<span class="ffs-wp-progress"><i></i><b></b></span>` : ""}
+    ${icon.chevronDown(16)}
+  </button>
+  ${this.store.prefs.progressBar ? `<span class="ffs-wp-progress"><i></i></span>` : ""}
 </span>`;
   }
 
   private ao3End(w: ShownWork): string {
-    const notice = this.notice && this.notice.until > Date.now() ? `<p class="ffs-ao3-kudos" role="status">${esc(this.notice.text)}</p>` : "";
+    const notice = this.notice && this.notice.until > Date.now() ? `<p class="ffs-ao3-notice" role="status">${esc(this.notice.text)}</p>` : "";
     return `
 <div class="ffs-ao3-end">
   <ul class="actions">
     <li><button class="ffs-ao3-btn" data-ffs-act="top">↑ Top</button></li>
     <li><button class="ffs-ao3-btn" data-ffs-act="next">Next Chapter →</button></li>
-    <li><button class="ffs-ao3-btn" data-ffs-act="kudos" aria-pressed="${w.meta.kudos ? "true" : "false"}">Kudos ♥</button></li>
-    <li><button class="ffs-ao3-btn" data-ffs-act="comment">Comments (${w.info.replies})</button></li>
   </ul>
   ${notice}
-  ${w.meta.kudos ? `<p class="ffs-ao3-kudos" data-ffs-kudos><span class="heart">${icon.heart(22)}</span><span><a>${esc(w.info.personaName)}</a> left kudos on this work!</span></p>` : ""}
   <p class="ffs-ao3-colophon">${esc(w.title)} · ${w.info.chapters} chapters · ${(w.info.estimated ? "~" : "") + w.info.words.toLocaleString()} words · about ${readingMinutes(w.info.words)} min read</p>
 </div>`;
   }
 
-  private wattpadEnd(w: ShownWork): string {
-    const latest = this.latestPartId();
-    const voted = latest ? (w.meta.votes ?? []).includes(latest) : false;
-    const notice = this.notice && this.notice.until > Date.now() ? `<span class="ffs-wp-copied" role="status">${esc(this.notice.text)}</span>` : "";
+  private wattpadEnd(): string {
+    const notice = this.notice && this.notice.until > Date.now() ? `<p class="ffs-wp-notice" role="status">${esc(this.notice.text)}</p>` : "";
     return `
 <div class="ffs-wp-end">
   <button class="ffs-wp-next" data-ffs-act="next">Continue to next part</button>
-  <div class="ffs-wp-endrow">
-    <button data-ffs-act="library" aria-pressed="${w.meta.inLibrary ? "true" : "false"}">${w.meta.inLibrary ? "✓ In library" : `${icon.plus(14)} Add`}</button>
-    <button data-ffs-act="vote" aria-pressed="${voted}">${voted ? icon.star(15) : icon.starOutline(15)} Vote</button>
-    ${notice}
-    <span class="share">
-      <button data-ffs-act="copy" title="Copy link">${icon.share(15)}</button>
-      <button data-ffs-act="download" title="Download as a book">${icon.download(15)}</button>
-    </span>
-  </div>
+  ${notice}
 </div>`;
   }
 
@@ -501,19 +453,7 @@ export class Chrome {
       if (prefs.skin === "ao3") {
         html = `<div class="ffs-ao3-ch"><h3><span>Chapter ${n}</span></h3></div>`;
       } else {
-        const meta = this.store.work(info.chatId);
-        const voted = record.messageId ? (meta.votes ?? []).includes(record.messageId) : false;
-        const words = part?.words ?? 0;
-        html = `
-<div class="ffs-wp-ch">
-  <h3>Chapter ${spellNumber(n)}</h3>
-  <div class="stats">
-    <span title="Reads">${icon.eye(14)} ${formatCount(meta.hits ?? 1)}</span>
-    <button data-ffs-act="vote-part" data-ffs-id="${esc(record.messageId ?? "")}" aria-pressed="${voted}" title="Vote">${voted ? icon.star(14) : icon.starOutline(14)} ${voted ? 1 : 0}</button>
-    <span title="Reading time">${icon.comment(13)} ${words ? `${readingMinutes(words)} min` : "…"}</span>
-  </div>
-  <hr>
-</div>`;
+        html = `<div class="ffs-wp-ch"><h3>Chapter ${spellNumber(n)}</h3></div>`;
       }
     } else if (mount === "message_header" && record.role === "user" && prefs.skin === "ao3") {
       const chapter = this.chapterBefore(record.messageId);
@@ -531,12 +471,6 @@ export class Chrome {
       if (!part.isUser) last = part.chapter;
     }
     return info.chapters;
-  }
-
-  private latestPartId(): string | null {
-    const parts = this.work.info?.wordsByOrder ?? [];
-    for (let i = parts.length - 1; i >= 0; i--) if (!parts[i]!.isUser) return parts[i]!.id;
-    return null;
   }
 
   // ---------- reading progress ----------
@@ -557,28 +491,16 @@ export class Chrome {
   }
 
   private onScroll = (): void => {
-    this.updateProgress(true);
+    this.updateProgress();
   };
 
-  private updateProgress(scrolling = false): void {
+  private updateProgress(): void {
     const bar = this.mounts.dock?.querySelector<HTMLElement>(".ffs-wp-progress");
     const list = this.scroller as HTMLElement | null;
     if (!bar || !list) return;
     const max = list.scrollHeight - list.clientHeight;
     const progress = max > 0 ? Math.min(1, Math.max(0, list.scrollTop / max)) : 1;
-    const pct = `${(progress * 100).toFixed(1)}%`;
-    bar.style.setProperty("--ffs-progress", pct);
-    const label = bar.querySelector<HTMLElement>("b");
-    if (label) {
-      const words = (this.work.info?.words ?? 0) * (1 - progress);
-      const minutes = Math.round(words / 238);
-      label.textContent = minutes < 1 ? "a few seconds left" : `${minutes} min${minutes === 1 ? "" : "s"} left`;
-    }
-    if (scrolling) {
-      bar.classList.add("show");
-      if (this.progressIdle) clearTimeout(this.progressIdle);
-      this.progressIdle = setTimeout(() => bar.classList.remove("show"), 1400);
-    }
+    bar.style.setProperty("--ffs-progress", `${(progress * 100).toFixed(1)}%`);
   }
 
   // ---------- actions ----------
@@ -591,7 +513,7 @@ export class Chrome {
     if (actionEl && actionEl.closest(".ffs-root")) {
       event.preventDefault();
       event.stopPropagation();
-      void this.run(actionEl.dataset.ffsAct ?? "", actionEl, event);
+      void this.run(actionEl.dataset.ffsAct ?? "", actionEl);
       return;
     }
 
@@ -622,9 +544,7 @@ export class Chrome {
     }
   }
 
-  private async run(action: string, el: HTMLElement, event: MouseEvent): Promise<void> {
-    const info = this.work.info;
-    const chatId = info?.chatId ?? null;
+  private async run(action: string, el: HTMLElement): Promise<void> {
     switch (action) {
       case "home":
         return this.invoke({ kind: "route", id: "/" }, () => location.assign("/"));
@@ -648,45 +568,11 @@ export class Chrome {
       case "top":
         (this.scroller as HTMLElement | null)?.scrollTo({ top: 0, behavior: "smooth" });
         return;
-      case "comment":
-        return this.focusComposer();
       case "index":
         return this.showIndex(el);
       case "next":
         return this.nextPart();
-      case "copy":
-        try {
-          await navigator.clipboard.writeText(location.href);
-          this.flash("Link copied");
-        } catch {
-          this.flash("Couldn't copy the link");
-        }
-        return;
-      case "kudos":
-        if (!chatId) return;
-        if (this.store.work(chatId).kudos) {
-          this.flash("You have already left kudos here. :)");
-          return;
-        }
-        this.store.setWork(chatId, { kudos: true });
-        requestAnimationFrame(() => this.mounts.after?.querySelector("[data-ffs-kudos]")?.classList.add("pop"));
-        return;
-      case "library":
-        if (chatId) this.store.setWork(chatId, { inLibrary: !this.store.work(chatId).inLibrary });
-        return;
-      case "vote":
-      case "vote-part": {
-        if (!chatId) return;
-        const id = action === "vote" ? this.latestPartId() : el.dataset.ffsId || null;
-        if (!id) return;
-        const votes = new Set(this.store.work(chatId).votes ?? []);
-        if (votes.has(id)) votes.delete(id);
-        else votes.add(id);
-        this.store.setWork(chatId, { votes: [...votes] });
-        return;
-      }
     }
-    void event;
   }
 
   private flash(text: string): void {
@@ -795,12 +681,3 @@ export class Chrome {
   }
 }
 
-function languageName(): string {
-  const lang = (navigator.language || "en").split("-")[0] ?? "en";
-  try {
-    const name = new Intl.DisplayNames([lang], { type: "language" }).of(lang);
-    return name ? name.charAt(0).toUpperCase() + name.slice(1) : "English";
-  } catch {
-    return "English";
-  }
-}

@@ -15,9 +15,9 @@ export interface Prefs {
   workHeader: boolean;
   /** "Chapter N" / "Part N" headings above each character reply. */
   chapterHeadings: boolean;
-  /** Wattpad paragraph comment bubbles. */
+  /** Wattpad: a faint quote marker beside a paragraph on hover. */
   paragraphComments: boolean;
-  /** Wattpad reading progress bar with time left. */
+  /** Wattpad: a thin reading-progress line under the story bar. */
   progressBar: boolean;
   /** Restyle the home page's chat and character cards. */
   restyleHome: boolean;
@@ -25,9 +25,11 @@ export interface Prefs {
   holdScroll: boolean;
   /** Prose size in px before Lumiverse's font scale. 0 = the skin's default. */
   proseSize: number;
+  /** Shape of the saved prefs; see migrate(). */
+  version: number;
 }
 
-/** Per-chat AO3 tagging and reader state. */
+/** Per-chat tagging. */
 export interface WorkMeta {
   title?: string;
   rating?: Rating;
@@ -38,11 +40,6 @@ export interface WorkMeta {
   additionalTags?: string;
   summary?: string;
   complete?: boolean;
-  kudos?: boolean;
-  /** Message ids the reader voted for (Wattpad). */
-  votes?: string[];
-  hits?: number;
-  inLibrary?: boolean;
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -51,12 +48,24 @@ export const DEFAULT_PREFS: Prefs = {
   siteHeader: true,
   workHeader: true,
   chapterHeadings: true,
-  paragraphComments: true,
-  progressBar: true,
+  paragraphComments: false,
+  progressBar: false,
   restyleHome: true,
   holdScroll: true,
   proseSize: 0,
+  version: 2,
 };
+
+/** Version 2 made the skins quieter: paragraph markers and the progress line start off. */
+function migrate(saved: Partial<Prefs> | null | undefined): Prefs {
+  const prefs = { ...DEFAULT_PREFS, ...(saved ?? {}) };
+  if ((saved?.version ?? 1) < 2) {
+    prefs.paragraphComments = false;
+    prefs.progressBar = false;
+  }
+  prefs.version = DEFAULT_PREFS.version;
+  return prefs;
+}
 
 const PREFS_KEY = "prefs:main";
 const WORKS_KEY = "works:all";
@@ -82,7 +91,7 @@ export class Store {
   loadCached(): void {
     try {
       const raw = localStorage.getItem(LOCAL_PREFIX + PREFS_KEY);
-      if (raw) this.prefs = { ...DEFAULT_PREFS, ...(JSON.parse(raw) as Partial<Prefs>) };
+      if (raw) this.prefs = migrate(JSON.parse(raw) as Partial<Prefs>);
     } catch {
       /* storage disabled */
     }
@@ -94,7 +103,7 @@ export class Store {
       this.read<Record<string, WorkMeta>>(WORKS_KEY),
     ]);
     // Changes made while the server copy was loading win over it.
-    if (!this.edited.has(PREFS_KEY)) this.prefs = { ...DEFAULT_PREFS, ...(prefs ?? {}) };
+    if (!this.edited.has(PREFS_KEY)) this.prefs = migrate(prefs);
     const saved = works && typeof works === "object" ? works : {};
     if (this.edited.has(WORKS_KEY)) {
       const merged = { ...saved };
@@ -116,7 +125,7 @@ export class Store {
       this.unwatch.push(
         settings.watch<Partial<Prefs>>(PREFS_KEY, (value) => {
           if (!value || this.saveTimers.has(PREFS_KEY)) return;
-          this.prefs = { ...DEFAULT_PREFS, ...value };
+          this.prefs = migrate(value);
           this.emit();
         }),
         settings.watch<Record<string, WorkMeta>>(WORKS_KEY, (value) => {
@@ -191,7 +200,7 @@ export class Store {
     }
   }
 
-  /** Debounced: kudos clicks and typing in the tag editor batch into one write. */
+  /** Debounced: toggles and typing in the tag editor batch into one write. */
   private write(key: string, value: unknown): void {
     this.edited.add(key);
     const existing = this.saveTimers.get(key);
